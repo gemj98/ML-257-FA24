@@ -32,8 +32,8 @@ while True:
     frame = cv2.polylines(frame, [pts1b], True, color, thickness)
     
     # Wrap the transformed image
-    cv2.imshow('frame', frame) # Initial Capture
-    cv2.imshow('frame1', result) # Transformed Capture
+    cv2.imshow('original', frame) # Initial Capture
+    cv2.imshow('transformed', result) # Transformed Capture
  
     # Exit the code by pressing 'Esc'
     if cv2.waitKey(24) == 27:
