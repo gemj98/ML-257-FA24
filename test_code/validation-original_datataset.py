@@ -10,7 +10,6 @@ import cv2
 from tensorflow.keras.models import load_model
 
 import json
-from PIL import Image
 from collections import defaultdict
 from tqdm import tqdm  # Import tqdm for the progress bar
 
@@ -19,7 +18,7 @@ script_dir = os.path.dirname(__file__)
 image_dir = os.path.join(script_dir, 'data', 'PKLot', 'test')
 test_data_path = r"data\PKLot\test"
 json_file_path = os.path.join(test_data_path, "_annotations.coco.json")
-model_path = r"model.h5"
+model_path = r"model.keras"
 
 
 def crop_roi(img, bbox):
