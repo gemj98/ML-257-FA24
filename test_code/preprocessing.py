@@ -11,7 +11,8 @@ image_dir = os.path.join(script_dir, 'data', 'PKLot')
 save_dir = os.path.join(script_dir, 'data', 'PKLot', 'cropped_dataset')
 # labels_cropped_path = os.path.join(save_dir, '_labels.json')
 
-data_folders = ["train", "valid", "test"]
+data_folders = ["train", "valid"]
+# data_folders = ["test"]
 categories = ["empty", "non-empty"]
 
 # Ensure the save directory exists
@@ -20,6 +21,12 @@ if not os.path.exists(save_dir):
 for category in categories:
     if not os.path.exists(os.path.join(save_dir, category)):
         os.makedirs(os.path.join(save_dir, category), exist_ok=True)
+        
+def crop_roi(img, bbox):
+    x, y, width, height = bbox
+    right = x + width
+    bottom = y + height
+    return img.crop((x, y, right, bottom))
 
 
 # Function to preprocess annotations and crop images based on bounding boxes
@@ -50,12 +57,7 @@ def crop_images(image_dir='path_to_images/', save_dir='path_to_save/', output_pr
                     # Crop for each annotation
                     for annotation in annotations:
                         bbox = annotation["bbox"]
-                        x, y, width, height = bbox
-                        right = x + width
-                        bottom = y + height
-    
-                        # Crop the image
-                        cropped_img = img.crop((x, y, right, bottom))
+                        cropped_img = crop_roi(img, bbox)
                         
                         # Save the cropped image with a unique name
                         category_name = categories[0] if annotation["category_id"] == 1 else categories[1]
