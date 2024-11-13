@@ -16,7 +16,7 @@ from tqdm import tqdm  # Import tqdm for the progress bar
 # Set the image directory path relative to the script location
 script_dir = os.path.dirname(__file__)
 image_dir = os.path.join(script_dir, 'data', 'PKLot', 'test')
-test_data_path = r"data\PKLot\test"
+test_data_path = os.path.join('data', 'PKLot', 'test')
 json_file_path = os.path.join(test_data_path, "_annotations.coco.json")
 model_path = r"model.keras"
 
