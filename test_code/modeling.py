@@ -48,7 +48,7 @@ model = Sequential([
     Dense(2, activation='softmax')])
 
 model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
+              loss='binary_crossentropy',
               metrics=['accuracy'])
 
 epochs = 3
