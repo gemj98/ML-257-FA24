@@ -8,7 +8,7 @@ import os
 from tensorflow.keras.utils import image_dataset_from_directory
 
 script_dir = os.path.dirname(__file__)
-data_dir = os.path.join(script_dir, 'data', 'PKLot', 'PKLot_cropped')
+data_dir = os.path.join(script_dir, 'data', 'PKLot', 'cropped_dataset')
 model_path = os.path.join(script_dir, 'model.keras')
 
 batch_size = 32
