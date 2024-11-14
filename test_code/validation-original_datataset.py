@@ -11,7 +11,6 @@ from tensorflow.keras.models import load_model
 
 import json
 from collections import defaultdict
-from tqdm import tqdm  # Import tqdm for the progress bar
 
 # Set the image directory path relative to the script location
 script_dir = os.path.dirname(__file__)
@@ -26,7 +25,7 @@ def crop_roi(img, bbox):
     right = x + width
     bottom = y + height
     roi = img[y:bottom, x:right]
-    return roi
+    return roi #Region Of Interest
 
 def preprocess_for_prediction(roi, target_size=(30, 30)):    
     # Resize the ROI to the target size expected by the model
@@ -60,8 +59,6 @@ def draw_bounding_boxes_and_predict(image, bboxes, model):
         rois.append(roi_preprocessed)
     # Convert list of ROIs to a numpy array for batch prediction
     rois_array = np.array(rois)
-    print()
-    print(rois_array.shape)
 
     # Ensure `rois_array` is not empty before predicting
     if rois_array.size == 0:
@@ -69,7 +66,7 @@ def draw_bounding_boxes_and_predict(image, bboxes, model):
         return image  # Return the original image if no ROIs are found
     
     # Perform batch prediction
-    predictions = model.predict(rois_array)
+    predictions = model.predict(rois_array, verbose=0)
     predicted_classes = np.argmax(predictions, axis=1)  # Get the predicted class for each ROI
 
     # Loop through bounding boxes and predicted classes to draw them on the frame
@@ -89,36 +86,39 @@ def main():
     # Load the model
     model = load_model(model_path)
 
-    with tqdm(total=len(data["images"]), desc="Processing images") as pbar:
-        for image_info in data["images"]:
-            image_id = image_info["id"]
-            image_path = os.path.join(image_dir, image_info["file_name"])
-            bboxes = [[int(x), int(y), int(w), int(h)] for (x, y, w, h) in bboxes_by_image[image_id]]
-    
-            try:
-                # Open the image with OpenCV
-                image = cv2.imread(image_path)
-                
-                # Check if the image was loaded successfully
-                if image is None:
-                    raise FileNotFoundError
-                
-                # Retrieve annotations for this image_id
-                frame_with_predictions = draw_bounding_boxes_and_predict(image, bboxes, model)
-                
-                # Display the output with predictions
-                cv2.imshow('Predicted output', frame_with_predictions)
-                
-                # Wait for 1 ms and check if 'q' is pressed to quit
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-                
-                # Update progress bar after processing each image
-                pbar.update(1)
+    print("Press 'E' to proceed to the next image or 'Q' to quit.")
+    for image_info in data["images"]:
+        image_id = image_info["id"]
+        image_path = os.path.join(image_dir, image_info["file_name"])
+        bboxes = [[int(x), int(y), int(w), int(h)] for (x, y, w, h) in bboxes_by_image[image_id]]
+
+        try:
+            # Open the image with OpenCV
+            image = cv2.imread(image_path)
             
-            except FileNotFoundError:
-                print(f"Image file not found: {image_path}")
-                pbar.update(1)  # Still update the progress bar if an image is missing
+            # Check if the image was loaded successfully
+            if image is None:
+                raise FileNotFoundError
+            
+            # Retrieve annotations for this image_id
+            frame_with_predictions = draw_bounding_boxes_and_predict(image, bboxes, model)
+            
+            # Display the output with predictions
+            cv2.imshow('Predicted output', frame_with_predictions)
+            
+            # Wait until 'E' key is pressed to show the next image
+            
+            while True:
+                key = cv2.waitKey(0) & 0xFF  # Wait indefinitely for a key press
+                if key == ord('e'):  # If 'E' is pressed
+                    break
+                elif key == ord('q'):  # If 'Q' is pressed, quit the loop
+                    cv2.destroyAllWindows()
+                    exit()
+            # cv2.waitKey(300)
+        
+        except FileNotFoundError:
+            print(f"Image file not found: {image_path}")
 
     # Close all OpenCV windows once done
     cv2.destroyAllWindows()

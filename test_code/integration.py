@@ -6,12 +6,10 @@ Created on Wed Nov  6 19:38:45 2024
 """
 import numpy as np
 import cv2
-from tqdm import tqdm  # Import tqdm for the progress bar
-
 
 mask_image_path = r"data\mask_1920_1080.png"
 video_path = r"data\parking_1920_1080.mp4"
-model_path = r"model.h5"
+model_path = r"model.keras"
 
 def preprocess_for_prediction(roi, target_size=(30, 30)):    
     roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
@@ -20,7 +18,6 @@ def preprocess_for_prediction(roi, target_size=(30, 30)):
     # Normalize pixel values if your model expects normalization
     roi_normalized = roi_resized / 255.0
     # Expand dimensions to add the batch size
-    roi_expanded = np.expand_dims(roi_normalized, axis=(0, -1))  # Add batch and channel dimensions
     return roi_normalized
 
 def draw_bounding_boxes_and_predict(frame, mask, model):
