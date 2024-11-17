@@ -1,22 +1,24 @@
-    # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Wed Nov  6 19:38:45 2024
 
 @author: gemj9
 """
-import numpy as np
 import os
 import cv2
-from tensorflow.keras.models import load_model  
+from tensorflow.keras.models import load_model
 import json
 
-from utils_module import get_annotations_from_json, get_bboxes_and_labels_by_image, draw_predicted_occupancy, draw_labeled_bounding_boxes
+from utils_module import get_annotations_from_json, get_bboxes_and_labels_by_image, draw_labeled_bounding_boxes
 
 # Set the image directory path relative to the script location
 script_dir = os.path.dirname(__file__)
 test_data_path = os.path.join(script_dir, '..', 'data', 'PKLot', 'test')       # Path to test data
 json_file_path = os.path.join(test_data_path, "_annotations.coco.json")  # Path to the annotations JSON file
 model_path = os.path.join(script_dir, 'model.keras')                     # Path to the trained model
+
+# Function to crop a region of interest (ROI) from an image based on a bounding box
+
 
 # Main function to load data, predict, and visualize results
 def main():
@@ -34,6 +36,8 @@ def main():
     for image_info in data["images"]:
         image_id = image_info["id"]  # Get the image ID
         image_path = os.path.join(test_data_path, image_info["file_name"])  # Get the path to the image file
+        
+        # Convert bounding box coordinates to integers
 
         try:
             # Load the image using OpenCV
@@ -44,15 +48,11 @@ def main():
                 raise FileNotFoundError
             
             bboxes, labels = get_bboxes_and_labels_by_image(annotations_by_image, image_id)
-            
             # Process the image: draw bounding boxes and predict classes
-            image_with_predictions = draw_predicted_occupancy(image.copy(), bboxes, model)
-            image_with_correct_labels = draw_labeled_bounding_boxes(image.copy(), bboxes, labels)
-
+            image_with_labels = draw_labeled_bounding_boxes(image, bboxes, labels)
             
             # Display the output with bounding boxes and predictions
-            cv2.imshow('Predicted output', image_with_predictions)
-            cv2.imshow('Real labels', image_with_correct_labels)
+            cv2.imshow('Predicted output', image_with_labels)
             
             # Wait for user input to proceed or quit
             while True:

@@ -58,7 +58,7 @@ model = Sequential([
     Flatten(),                                      # Flatten the feature maps to a vector
     Dense(128, activation='relu'),                  # Fully connected layer with 128 neurons
     Dropout(0.5),                                   # Dropout for regularization to prevent overfitting
-    Dense(2, activation='softmax')                  # Output layer with 2 neurons for binary classification
+    Dense(1, activation='sigmoid')                  # Output layer with 1 neurons for binary classification
 ])
 
 # Compile the model
