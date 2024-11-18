@@ -30,9 +30,9 @@ it will create a directory as dataset with relevant train and valid with yml fil
 This one is for modeling and getting th yolovn8.pt model to be trained with the custom images. They use the previous preprocessed data for modeling
 ![alt text](./images/image.png)
 3. python3 `yolovalidation.py` this one is to validate the validation set and give a score.
-![alt text](./images/image%20copy%202.png)
+![alt text](./images/image%20copy.png)
 4. python3 `yolotesting.py` this one is to test and visualize and create bounding boxes. you ll have to set path of test imahe and folder
-![alt text](image-2.png)
+![alt text](./images/image%20copy%202.png)
 ```
 run
 ├── detect
