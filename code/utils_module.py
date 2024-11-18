@@ -15,11 +15,11 @@ def preprocess_for_prediction(roi, target_size=(30, 30)):
     roi_resized = cv2.resize(roi, target_size)
     
     # Normalize pixel values to the range [0, 1] if required by the model
-    # roi_normalized = roi_resized / 255.0
+    roi_normalized = roi_resized / 255.0
     
     # Add a new axis for the channel (e.g., grayscale channel with depth 1)
-    # roi_expanded = np.expand_dims(roi_normalized, axis=-1)  # Shape: (30, 30, 1)
-    roi_expanded = np.expand_dims(roi_resized, axis=-1)  # Shape: (30, 30, 1)
+    roi_expanded = np.expand_dims(roi_normalized, axis=-1)  # Shape: (30, 30, 1)
+    # roi_expanded = np.expand_dims(roi_resized, axis=-1)  # Shape: (30, 30, 1)
     
     return roi_expanded  # Return the preprocessed ROI
 
@@ -46,11 +46,18 @@ def get_bboxes_and_labels_by_image(annotations_by_image, image_id):
     return bboxes, labels
 
 def draw_labeled_bounding_boxes(image, bboxes, labels):
+    empty_spots = 0
     # Draw bounding boxes and labels on the image
     for (x, y, w, h), predicted_class in zip(bboxes, labels):
         # Set bounding box color: green for empty, red for occupied (B, G, R)
-        color = (0, 255, 0) if predicted_class == 0 else (0, 0, 255)
+        if predicted_class == 0:
+            color = (0, 255, 0)
+            empty_spots += 1
+        else:
+            color = (0, 0, 255)
         cv2.rectangle(image, (x, y), (x+w, y+h), color, 2)  # Draw the bounding box
+    total_spots = len(bboxes)
+    image = add_description_image(image, total_spots, empty_spots)
     return image
 
 # Function to draw bounding boxes and predict classes for each ROI in an image
@@ -65,8 +72,8 @@ def draw_predicted_occupancy(image, bboxes, model):
     for bbox in bboxes:
         roi = crop_roi(gray, bbox)  # Crop the ROI from the image
         roi_preprocessed = preprocess_for_prediction(roi)  # Preprocess the ROI for prediction
-        if not rois:
-            print(f'roi_preprocessed: {roi_preprocessed}')
+        # if not rois:
+        #     print(f'roi_preprocessed: {roi_preprocessed}')
         rois.append(roi_preprocessed)  # Add the preprocessed ROI to the list
     
     # Convert the list of ROIs to a numpy array for batch prediction
@@ -79,9 +86,30 @@ def draw_predicted_occupancy(image, bboxes, model):
     
     # Perform batch prediction on the ROIs
     predictions = model.predict(rois_array, verbose=0)
-    predicted_classes = np.argmax(predictions, axis=1)  # Determine the predicted class for each ROI
+    predicted_classes = (predictions > 0.5).astype(int)
 
     # Draw bounding boxes and labels on the image
     image = draw_labeled_bounding_boxes(image, bboxes, predicted_classes)
 
     return image  # Return the image with bounding boxes and predictions
+
+def add_description_image(image, total_spots, empty_spots):
+    # Create a blank space below the image for the text
+    padding_height = 50  # Height of the padding area for text
+    padding_color = (0, 0, 0)  # Black background for the padding
+
+    # Expand the canvas
+    expanded_image = cv2.copyMakeBorder(image, 0, padding_height, 0, 0, cv2.BORDER_CONSTANT, value=padding_color)
+
+    # Define text properties
+    text = f"Total Spots: {total_spots:3}, Empty Spots: {empty_spots:3}"
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 1
+    font_color = (0, 255, 0)  # Green color
+    thickness = 2
+    position = (10, image.shape[0] + 35)  # Position in the padding area
+
+    # Add the text to the expanded area
+    cv2.putText(expanded_image, text, position, font, font_scale, font_color, thickness)
+
+    return expanded_image  # Return the image with the expanded canvas and text

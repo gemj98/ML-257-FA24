@@ -4,7 +4,6 @@ Created on Wed Nov  6 19:38:45 2024
 
 @author: gemj9
 """
-import numpy as np
 import os
 import cv2
 from tensorflow.keras.models import load_model  
@@ -16,7 +15,7 @@ from utils_module import get_annotations_from_json, get_bboxes_and_labels_by_ima
 script_dir = os.path.dirname(__file__)
 test_data_path = os.path.join(script_dir, '..', 'data', 'PKLot', 'test')       # Path to test data
 json_file_path = os.path.join(test_data_path, "_annotations.coco.json")  # Path to the annotations JSON file
-model_path = os.path.join(script_dir, 'model.keras')                     # Path to the trained model
+model_path = os.path.join(script_dir, 'model_normalized_30_30.keras')                     # Path to the trained model
 
 # Main function to load data, predict, and visualize results
 def main():

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov  6 16:19:31 2024
+Created on Sun Nov 17 23:25:39 2024
 
 @author: gemj9
 """
-
 # Import necessary libraries
 import os
 import matplotlib.pyplot as plt
@@ -18,15 +17,15 @@ script_dir = os.path.dirname(__file__)
 
 # Define the path to the dataset directory
 # The dataset contains cropped images of parking spaces (assumed structure is labeled subdirectories)
-data_dir = os.path.join(script_dir, '..', 'data', 'PKLot', 'cropped_dataset')
+data_dir = os.path.join(script_dir, '..', 'data', 'PKLot', 'cropped_dataset_1')
 
 # Define the path to save the trained model
-model_path = os.path.join(script_dir, 'model.keras')
+model_path = os.path.join(script_dir, 'model_3.keras')
 
 # Hyperparameters for the dataset loading
-batch_size = 64  # Number of samples per batch
-img_height = 30  # Image height in pixels (resized for uniformity)
-img_width = 30   # Image width in pixels (resized for uniformity)
+batch_size = 32  # Number of samples per batch
+img_height = 15  # Image height in pixels (resized for uniformity)
+img_width = 15   # Image width in pixels (resized for uniformity)
 
 # Load the training dataset
 # Splitting data into training and validation subsets using an 80-20 split
@@ -58,35 +57,23 @@ val_ds = val_ds.map(lambda x, y: (x / 255.0, y))
 # Optimize for performance
 train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
 val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+    
+# Function to visualize images with their labels
+def visualize_dataset(dataset, title):
+    plt.figure(figsize=(15, 60))
+    for images, labels in dataset.take(1):  # Take one batch of data
+        for i in range(10*4):  # Display 9 images
+            if i == 0:
+                print(images[i])
+            ax = plt.subplot(10, 4, i + 1)
+            plt.imshow(images[i].numpy().squeeze(), cmap='gray')
+            plt.title(f"Label: {int(labels[i].numpy())}")
+            plt.axis("off")
+    plt.suptitle(title)
+    plt.show()
 
-# Define the CNN model architecture
-model = Sequential([
-    Conv2D(32, (3, 3), 
-           activation='relu', 
-           input_shape=(img_height, img_width, 1)), # First convolutional layer
-    MaxPooling2D(2, 2),                             # First max pooling layer
-    Conv2D(64, (3, 3), activation='relu'),          # Second convolutional layer
-    MaxPooling2D(2, 2),                             # Second max pooling layer
-    Flatten(),                                      # Flatten the feature maps to a vector
-    Dense(128, activation='relu'),                  # Fully connected layer with 128 neurons
-    Dropout(0.5),                                   # Dropout for regularization to prevent overfitting
-    Dense(1, activation='sigmoid')                  # Output layer with 1 neurons for binary classification
-])
+# Visualize training dataset
+visualize_dataset(train_ds, "Training Dataset")
 
-# Compile the model
-# Using Adam optimizer, binary cross-entropy loss, and accuracy metric
-model.compile(optimizer='adam',
-              loss='binary_crossentropy',
-              metrics=['accuracy'])
-
-# Set the number of epochs for training
-epochs = 10  # Number of passes through the entire dataset during training
-
-# Train the model
-history = model.fit(
-    train_ds,                # Training data
-    validation_data=val_ds,  # Validation data
-    epochs=epochs)           # Number of epochs
-
-# Save the trained model to the specified path
-model.save(model_path)
+# Visualize validation dataset
+visualize_dataset(val_ds, "Validation Dataset")
