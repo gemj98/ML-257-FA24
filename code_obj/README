@@ -1,2 +1,10 @@
 This file contains the code for various models for finding if a specific parking spot works for specific kinds of cars.
 
+The types of cars considered are-
+- compact cars
+- sedans
+- SUV
+- pick-up truck
+
+The labels are annotations and the training data is created manually using Roboflow.
+Owing to the large size of the files, the data is available with the code owner
